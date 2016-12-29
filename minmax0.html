@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+</style>
+</head>
+<body>
+<table id='plField'>
+  <tr>
+    <th>A</th>
+    <th>B</th>
+    <th>C</th>
+  </tr>
+
+</table>
+
+<script>
+"use strict";
+
+// tic-tac-toe via MinMax (see Russel/Norvig)
+
+var pfield = [	[0, 0, 0],
+				[0, 0, 0],
+				[0, 0, 0]];
+				
+var retSucc = []; // successors for given state
+var INF = Number.MAX_VALUE;
+
+successors('010020000', '1'); // players are 1 and 2, 0 is empty
+console.log(retSucc.toString());
+console.log(utility('100012221', '1', null));
+//console.log(minimaxDecision('100012221', '1'));
+				
+var table = document.getElementById("plField");
+for ( var i = 0; i<3; i++ ) {
+	var row = table.insertRow(i + 1);
+	var cell0 = row.insertCell(0);
+	var cell1 = row.insertCell(1);
+	var cell2 = row.insertCell(2);
+	cell0.innerHTML = pfield[i][0].toString();
+	cell1.innerHTML = pfield[i][1].toString();
+	cell2.innerHTML = pfield[i][2].toString();
+}
+
+function oPlayer(plyr) { // invert player
+	if (plyr == '1') return '2';
+	else return '1';
+}
+
+function successors(state, plyr) { // returns all possible successors from current state for plyr in array retSucc
+	retSucc = [];
+	var currState = state.split(""); // states represented as strings: 0-free, 1-plyr 1, 2-plyr 2
+	var cpyState = "";
+	var tempState = "";
+	currState.forEach(function (cval, index, arr) {
+		tempState = cpyState;
+		if ( cval == '0' ) { // free spot: put plyr on it and add to successor state list
+			cpyState += plyr;
+			if ( index < arr.length - 1 ) cpyState += state.slice(index+1, arr.length);
+			retSucc.push( cpyState ); // new successor state added to successor state list
+			cpyState = tempState + '0';
+		} else cpyState += cval; // no successor state generated (player 1 or 2 occupy tile)
+	});
+}
+
+function utility(state, plyr, prevU) { // returns utility for current state (+1: win, -1: loss, 0: draw), assumes state not terminal
+	// detect win-patterns, first for plyr, then for other player (!plyr)
+	// need to check both to determine possible draw
+	var winPatt = new RegExp("");
+	var plyrUtil = null;
+	var otherUtil = null;
+	//console.log('state: ' + state);
+	do {
+		// case 0: horizontal, e.g. 111000000
+		winPatt = new RegExp(plyr + plyr + plyr, "ig"); // e.g. /111/ig
+		// here we need to check for certain positions (only 0, 3 and 6 valid)
+		switch ( state.search(winPatt) ) {
+			case 0: // falls through
+			case 3: // falls through
+			case 6:
+				plyrUtil = state.match(winPatt);
+				break;
+			default:
+				break;
+		}
+		if ( plyrUtil != null ) break;
+		// case 1: vertical, e.g. 010010010
+		winPatt = new RegExp(plyr + ".." + plyr + ".." + plyr + "..", "ig"); // e.g. /1..1..1../ig
+		plyrUtil = state.match(winPatt);
+		if ( plyrUtil != null ) break;
+		winPatt = new RegExp("." + plyr + ".." + plyr + ".." + plyr + ".", "ig"); // e.g. /.1..1..1./ig
+		plyrUtil = state.match(winPatt);
+		if ( plyrUtil != null ) break;
+		winPatt = new RegExp(".." + plyr + ".." + plyr + ".." + plyr, "ig"); // e.g. /..1..1..1/ig
+		plyrUtil = state.match(winPatt);
+		if ( plyrUtil != null ) break;
+		// case 2: diagonal 1, e.g. 010010010
+		winPatt = new RegExp(plyr + "..." + plyr + "..." + plyr, "ig"); // e.g. /1...1...1/ig
+		plyrUtil = state.match(winPatt);
+		if ( plyrUtil != null ) break;
+		// case 3: diagonal 2, e.g. 010010010
+		winPatt = new RegExp(".." + plyr + "." + plyr + "." + plyr + "..", "ig"); // e.g. /..1.1.1../ig
+		plyrUtil = state.match(winPatt);
+	} while (false); // a bit dirty ...
+	//console.log('plyr util: ' + plyrUtil + ' prev: ' + prevU);
+	if ( plyrUtil != null ) // some winning pattern found for current player
+		if ( prevU == null ) {
+			otherUtil = utility(state, oPlayer(plyr), 1); // must check other player
+			if ( otherUtil == -1 ) return 1; // win: other player has no win pattern
+			else return 0; //draw: both have winning patterns
+		} else
+			if ( prevU == -1 ) return 1; // win: previous player had no winning pattern, this one has
+			else return 0; // draw: both have winning pattern
+	else // no winning pattern for current player
+		if ( prevU == null ) {
+			otherUtil = utility(state, oPlayer(plyr), -1); // must check other player
+			if ( otherUtil == 1 ) return -1; // loss: other player has a win pattern
+			else return 0; // draw: both have winning patterns
+		} else
+			if (prevU == 1) return -1; // loss: previous player had a winning pattern, this player not
+			else return 0; // draw: both have no winning pattern
+	return 0; // default (non-terminal case)
+}
+
+function terminalTest(state) { // checks for further moves, returns true if end reached
+	if ( state.search(/0/) > -1 ) return false;
+	return true;
+}
+
+function minimaxDecision(state, plyr) {
+	v = maxVal(state, plyr);
+	successors(state, plyr);
+	//return action in successors(state, plyr) with value v; todo: need a util eval for this
+}
+	
+function maxVal(state, plyr) {
+	if ( terminalTest(state) ) return utility(state, plyr, null);
+	var v = -INF;
+	successors(state, plyr);
+	console.log('maxVal: ' + retSucc.toString());
+	for ( var s in retSucc )
+		v = Math.max(v, minVal(s, plyr));
+	return v;
+}
+
+function minVal(state, plyr) {
+	if ( terminalTest(state) ) return utility(state, plyr, null);
+	var v = +INF;
+	successors(state, plyr);
+	for ( var s in retSucc )
+		v = Math.min(v, maxVal(s, plyr));
+	return v;
+}
+
+</script>
+<p><strong>Note:</strong> MinMax </p>
+</body>
+</html>
