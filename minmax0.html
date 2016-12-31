@@ -42,7 +42,7 @@ var INF = Number.MAX_VALUE;
 
 //successors('010020000', '1'); // players are 1 and 2, 0 is empty
 //console.log(utility('100012221', '1', null));
-console.log(minimaxDecision('100012221', '1'));
+console.log(minimaxDecision('121212200', '1'));
 				
 var table = document.getElementById("plField");
 for ( var i = 0; i<3; i++ ) {
@@ -137,43 +137,53 @@ function utility(state, plyr, prevU) { // returns utility for current state (+1:
 }
 
 function terminalTest(state) { // checks for further moves, returns true if end reached
-	console.log('termtest ' + state);
+	//console.log('termtest ' + state);
 	if ( typeof state == 'undefined' ) return true;
 	if ( state.search(/0/g) < 0 ) return true;
 	return false;
 }
 
-function minimaxDecision(state, plyr) {
-	var v = maxVal(state, plyr);
-	var succ = successors(state, plyr);
+function minimaxDecision(state, plyr) { // state is the current game state, for player plyr
+	var v = -INF;
+	var retSucc = successors(state, plyr);
+	var arrayLength = retSucc.length;
+	var chosenAction = -1;
+	for ( var i = 0; i < arrayLength; i++ ) {
+		var currMax = maxVal(retSucc[i], plyr);
+		if ( currMax >= v ) {
+			chosenAction = i;
+			v = currMax;
+		}
+	}
 	//return action in successors(state, plyr) with value v; todo: need a util eval for this
-	return v;
+	console.log('v: ' + v);
+	return retSucc[chosenAction];
 }
 	
-function maxVal(state, plyr) {
-	console.log('maxVal: ' + state);
+function maxVal(state, plyr) { // returns utility value
+	//console.log('maxVal: ' + state);
 	if ( terminalTest(state) ) return utility(state, plyr, null);
 	var v = -INF;
 	//console.log('state: ' + state + ' plyr ' + plyr + 'retSucc: ' + retSucc.toString());
 	var retSucc = successors(state, plyr);
-	console.log('maxVal ret: ' + retSucc.toString());
+	//console.log('maxVal ret: ' + retSucc.toString());
 	var arrayLength = retSucc.length;
 	for ( var i = 0; i < arrayLength; i++ ) {
-		console.log('maxVal for: ' + retSucc[i]);
+		//console.log('maxVal for: ' + retSucc[i]);
 		v = Math.max(v, minVal(retSucc[i], plyr));
 	}
 	return v;
 }
 
-function minVal(state, plyr) {
-	console.log('minVal: ' + state);
+function minVal(state, plyr) { // returns utility value
+	//console.log('minVal: ' + state);
 	if ( terminalTest(state) ) return utility(state, plyr, null);
 	var v = +INF;
 	var retSucc = successors(state, plyr);
-	console.log('minVal ret: ' + retSucc.toString());
+	//console.log('minVal ret: ' + retSucc.toString());
 	var arrayLength = retSucc.length;
 	for ( var i = 0; i < arrayLength; i++ ) {
-		console.log('minVal for: ' + retSucc[i]);
+		//console.log('minVal for: ' + retSucc[i]);
 		v = Math.min(v, maxVal(retSucc[i], plyr));
 	}
 	return v;
