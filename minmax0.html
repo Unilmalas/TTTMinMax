@@ -42,7 +42,7 @@ var INF = Number.MAX_VALUE;
 
 //successors('010020000', '1'); // players are 1 and 2, 0 is empty
 //console.log(utility('100012221', '1', null));
-console.log(minimaxDecision('121212200', '1'));
+console.log(minmaxDecision('121212200', '1'));
 				
 var table = document.getElementById("plField");
 for ( var i = 0; i<3; i++ ) {
@@ -50,9 +50,18 @@ for ( var i = 0; i<3; i++ ) {
 	var cell0 = row.insertCell(0);
 	var cell1 = row.insertCell(1);
 	var cell2 = row.insertCell(2);
+	cell0.id = "plC0" + i; // set ids for onClick events
+	cell1.id = "plC1" + i;
+	cell2.id = "plC2" + i;
 	cell0.innerHTML = pfield[i][0].toString();
 	cell1.innerHTML = pfield[i][1].toString();
 	cell2.innerHTML = pfield[i][2].toString();
+}
+
+document.getElementById("plC00").onclick = tstf();
+
+function tstf() {
+	console.log('sdasdasdads');
 }
 
 function oPlayer(plyr) { // invert player
@@ -143,7 +152,7 @@ function terminalTest(state) { // checks for further moves, returns true if end 
 	return false;
 }
 
-function minimaxDecision(state, plyr) { // state is the current game state, for player plyr
+function minmaxDecision(state, plyr) { // state is the current game state, for player plyr
 	var v = -INF;
 	var retSucc = successors(state, plyr);
 	var arrayLength = retSucc.length;
