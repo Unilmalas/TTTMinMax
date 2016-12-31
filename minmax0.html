@@ -20,7 +20,7 @@ tr:nth-child(even) {
 </style>
 </head>
 <body>
-<table id='plField'>
+<table id='plField' align="center">
   <tr>
     <th>A</th>
     <th>B</th>
@@ -42,8 +42,11 @@ var INF = Number.MAX_VALUE;
 
 //successors('010020000', '1'); // players are 1 and 2, 0 is empty
 //console.log(utility('100012221', '1', null));
-console.log(minmaxDecision('121212200', '1'));
-				
+//console.log(minmaxDecision('121212200', '1'));
+
+// playfield and user interaction
+
+// initial field setup
 var table = document.getElementById("plField");
 for ( var i = 0; i<3; i++ ) {
 	var row = table.insertRow(i + 1);
@@ -58,10 +61,100 @@ for ( var i = 0; i<3; i++ ) {
 	cell2.innerHTML = pfield[i][2].toString();
 }
 
-document.getElementById("plC00").onclick = tstf();
+// not sure this is ideal but works for now...
+document.getElementById("plC00").addEventListener('click', function (id) {
+	console.log(id.target.id);
+	document.getElementById("plC00").innerHTML = "1";
+	pfield[0][0] = 1;
+	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	updatePfield(pfield);
+});
+document.getElementById("plC10").addEventListener('click', function (id) {
+	console.log(id.target.id);
+	document.getElementById("plC10").innerHTML = "1";
+	pfield[0][1] = 1;
+	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	updatePfield(pfield);
+});
+document.getElementById("plC20").addEventListener('click', function (id) {
+	console.log(id.target.id);
+	document.getElementById("plC20").innerHTML = "1";
+	pfield[0][2] = 1;
+	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	updatePfield(pfield);
+});
+document.getElementById("plC01").addEventListener('click', function (id) {
+	console.log(id.target.id);
+	document.getElementById("plC01").innerHTML = "1";
+	pfield[1][0] = 1;
+	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	updatePfield(pfield);
+});
+document.getElementById("plC11").addEventListener('click', function (id) {
+	console.log(id.target.id);
+	document.getElementById("plC11").innerHTML = "1";
+	pfield[1][1] = 1;
+	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	updatePfield(pfield);
+});
+document.getElementById("plC21").addEventListener('click', function (id) {
+	console.log(id.target.id);
+	document.getElementById("plC21").innerHTML = "1";
+	pfield[1][2] = 1;
+	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	updatePfield(pfield);
+});
+document.getElementById("plC02").addEventListener('click', function (id) {
+	console.log(id.target.id);
+	document.getElementById("plC02").innerHTML = "1";
+	pfield[2][0] = 1;
+	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	updatePfield(pfield);
+});
+document.getElementById("plC12").addEventListener('click', function (id) {
+	console.log(id.target.id);
+	document.getElementById("plC12").innerHTML = "1";
+	pfield[2][1] = 1;
+	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	updatePfield(pfield);
+});
+document.getElementById("plC22").addEventListener('click', function (id) {
+	console.log(id.target.id);
+	document.getElementById("plC22").innerHTML = "1";
+	pfield[2][2] = 1;
+	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	updatePfield(pfield);
+});
 
-function tstf() {
-	console.log('sdasdasdads');
+function updatePfield(pf) { // update playing field from memory
+	for ( var i = 0; i<3; i++ ) {
+		document.getElementById("plC0" + i).innerHTML = pfield[i][0].toString();
+		document.getElementById("plC1" + i).innerHTML = pfield[i][1].toString();
+		document.getElementById("plC2" + i).innerHTML = pfield[i][2].toString();
+	}
+}
+
+// game logic
+
+function pfieldString(pf) { // convert playfield array to string, returns pf as string
+	var fieldsize = pf.length * pf.length; // crude, need to improve this...
+	var fstr = "";
+	for (var i=0; i<fieldsize; i++ ) {
+		fstr += pf[(i - i % 3)/3][i % 3]; // actually 2-dim, lets see...
+	}
+	return fstr;
+}
+
+function strPfield(str) { // convert string to playfield, returns pf as array
+	var fieldsize = str.length;
+	console.log('str ' + str);
+	var pf = [];
+	for (var i=0; i<fieldsize; i++ ) {
+		pf[i] = parseInt(str.charAt(i));
+		console.log('c0 ' + (i - i % 3)/3 + ' c1 ' + (i % 3) + ' str i ' + i + ' ' + str.charAt(i));
+		pfield[(i - i % 3)/3][i % 3] = parseInt(str.charAt(i));
+	}
+	return pf;
 }
 
 function oPlayer(plyr) { // invert player
