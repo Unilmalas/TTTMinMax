@@ -41,8 +41,8 @@ var pfield = [	[0, 0, 0],
 var INF = Number.MAX_VALUE;
 
 //successors('010020000', '1'); // players are 1 and 2, 0 is empty
-//console.log(utility('100012221', '1', null));
-//console.log(minmaxDecision('121212200', '1'));
+//console.log(utility('201111200', '2', null));
+console.log(minimaxDecision('201110200', '2'));
 
 // playfield and user interaction
 
@@ -66,63 +66,63 @@ document.getElementById("plC00").addEventListener('click', function (id) {
 	console.log(id.target.id);
 	document.getElementById("plC00").innerHTML = "1";
 	pfield[0][0] = 1;
-	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	strPfield(minimaxDecision(pfieldString(pfield), '2'));
 	updatePfield(pfield);
 });
 document.getElementById("plC10").addEventListener('click', function (id) {
 	console.log(id.target.id);
 	document.getElementById("plC10").innerHTML = "1";
 	pfield[0][1] = 1;
-	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	strPfield(minimaxDecision(pfieldString(pfield), '2'));
 	updatePfield(pfield);
 });
 document.getElementById("plC20").addEventListener('click', function (id) {
 	console.log(id.target.id);
 	document.getElementById("plC20").innerHTML = "1";
 	pfield[0][2] = 1;
-	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	strPfield(minimaxDecision(pfieldString(pfield), '2'));
 	updatePfield(pfield);
 });
 document.getElementById("plC01").addEventListener('click', function (id) {
 	console.log(id.target.id);
 	document.getElementById("plC01").innerHTML = "1";
 	pfield[1][0] = 1;
-	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	strPfield(minimaxDecision(pfieldString(pfield), '2'));
 	updatePfield(pfield);
 });
 document.getElementById("plC11").addEventListener('click', function (id) {
 	console.log(id.target.id);
 	document.getElementById("plC11").innerHTML = "1";
 	pfield[1][1] = 1;
-	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	strPfield(minimaxDecision(pfieldString(pfield), '2'));
 	updatePfield(pfield);
 });
 document.getElementById("plC21").addEventListener('click', function (id) {
 	console.log(id.target.id);
 	document.getElementById("plC21").innerHTML = "1";
 	pfield[1][2] = 1;
-	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	strPfield(minimaxDecision(pfieldString(pfield), '2'));
 	updatePfield(pfield);
 });
 document.getElementById("plC02").addEventListener('click', function (id) {
 	console.log(id.target.id);
 	document.getElementById("plC02").innerHTML = "1";
 	pfield[2][0] = 1;
-	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	strPfield(minimaxDecision(pfieldString(pfield), '2'));
 	updatePfield(pfield);
 });
 document.getElementById("plC12").addEventListener('click', function (id) {
 	console.log(id.target.id);
 	document.getElementById("plC12").innerHTML = "1";
 	pfield[2][1] = 1;
-	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	strPfield(minimaxDecision(pfieldString(pfield), '2'));
 	updatePfield(pfield);
 });
 document.getElementById("plC22").addEventListener('click', function (id) {
 	console.log(id.target.id);
 	document.getElementById("plC22").innerHTML = "1";
 	pfield[2][2] = 1;
-	strPfield(minmaxDecision(pfieldString(pfield), '2'));
+	strPfield(minimaxDecision(pfieldString(pfield), '2'));
 	updatePfield(pfield);
 });
 
@@ -146,6 +146,7 @@ function pfieldString(pf) { // convert playfield array to string, returns pf as 
 }
 
 function strPfield(str) { // convert string to playfield, returns pf as array
+	if ( str == null ) return [];
 	var fieldsize = str.length;
 	console.log('str ' + str);
 	var pf = [];
@@ -188,17 +189,14 @@ function utility(state, plyr, prevU) { // returns utility for current state (+1:
 	//console.log('state: ' + state);
 	do {
 		// case 0: horizontal, e.g. 111000000
-		winPatt = new RegExp(plyr + plyr + plyr, "ig"); // e.g. /111/ig
-		// here we need to check for certain positions (only 0, 3 and 6 valid)
-		switch ( state.search(winPatt) ) {
-			case 0: // falls through
-			case 3: // falls through
-			case 6:
-				plyrUtil = state.match(winPatt);
-				break;
-			default:
-				break;
-		}
+		winPatt = new RegExp(plyr + plyr + plyr + '......', "ig"); // /111....../ig
+		plyrUtil = state.match(winPatt);
+		if ( plyrUtil != null ) break;
+		winPatt = new RegExp('...' + plyr + plyr + plyr + '...', "ig"); // /...111.../ig
+		plyrUtil = state.match(winPatt);
+		if ( plyrUtil != null ) break;
+		winPatt = new RegExp('......' + plyr + plyr + plyr, "ig"); // /......111/ig
+		plyrUtil = state.match(winPatt);
 		if ( plyrUtil != null ) break;
 		// case 1: vertical, e.g. 010010010
 		winPatt = new RegExp(plyr + ".." + plyr + ".." + plyr + "..", "ig"); // e.g. /1..1..1../ig
@@ -218,7 +216,7 @@ function utility(state, plyr, prevU) { // returns utility for current state (+1:
 		winPatt = new RegExp(".." + plyr + "." + plyr + "." + plyr + "..", "ig"); // e.g. /..1.1.1../ig
 		plyrUtil = state.match(winPatt);
 	} while (false); // a bit dirty ...
-	//console.log('plyr util: ' + plyrUtil + ' prev: ' + prevU);
+	//console.log('plyr ' + plyr + ' util: ' + plyrUtil + ' prev: ' + prevU);
 	if ( plyrUtil != null ) // some winning pattern found for current player
 		if ( prevU == null ) {
 			otherUtil = utility(state, oPlayer(plyr), 1); // must check other player
@@ -230,6 +228,7 @@ function utility(state, plyr, prevU) { // returns utility for current state (+1:
 	else // no winning pattern for current player
 		if ( prevU == null ) {
 			otherUtil = utility(state, oPlayer(plyr), -1); // must check other player
+			//console.log('other util: ' + state + ' : ' + otherUtil);
 			if ( otherUtil == 1 ) return -1; // loss: other player has a win pattern
 			else return 0; // draw: both have winning patterns
 		} else
@@ -245,48 +244,53 @@ function terminalTest(state) { // checks for further moves, returns true if end 
 	return false;
 }
 
-function minmaxDecision(state, plyr) { // state is the current game state, for player plyr
+function minimaxDecision(state, plyr) { // state is the current game state, for player plyr
+	var util = utility(state, plyr, null);
+	if ( terminalTest(state) || util != 0 ) {
+		return state; // no action to be taken (terminal)
+	}
 	var v = -INF;
 	var retSucc = successors(state, plyr);
 	var arrayLength = retSucc.length;
 	var chosenAction = -1;
 	for ( var i = 0; i < arrayLength; i++ ) {
-		var currMax = maxVal(retSucc[i], plyr);
-		if ( currMax >= v ) {
+		var currMax = minVal(retSucc[i], plyr);
+		console.log('minimax dec ' + retSucc[i] + ' cMin ' + currMax);
+		if ( currMax > v ) {
 			chosenAction = i;
 			v = currMax;
 		}
 	}
 	//return action in successors(state, plyr) with value v; todo: need a util eval for this
-	console.log('v: ' + v);
-	return retSucc[chosenAction];
+	//console.log('v: ' + v + ' action chosen: ' + chosenAction + ' : ' + retSucc[chosenAction]);
+	if ( chosenAction >= 0 ) return retSucc[chosenAction];
 }
 	
 function maxVal(state, plyr) { // returns utility value
-	//console.log('maxVal: ' + state);
-	if ( terminalTest(state) ) return utility(state, plyr, null);
+	var util = utility(state, plyr, null);
+	//console.log('maxV p: ' + plyr + ' ste ' + state + ' util ' + util);
+	if ( terminalTest(state) || util != 0 ) return util;
 	var v = -INF;
-	//console.log('state: ' + state + ' plyr ' + plyr + 'retSucc: ' + retSucc.toString());
 	var retSucc = successors(state, plyr);
 	//console.log('maxVal ret: ' + retSucc.toString());
 	var arrayLength = retSucc.length;
 	for ( var i = 0; i < arrayLength; i++ ) {
 		//console.log('maxVal for: ' + retSucc[i]);
-		v = Math.max(v, minVal(retSucc[i], plyr));
+		v = Math.max(v, minVal(retSucc[i], oPlayer(plyr)));
 	}
 	return v;
 }
 
 function minVal(state, plyr) { // returns utility value
-	//console.log('minVal: ' + state);
-	if ( terminalTest(state) ) return utility(state, plyr, null);
+	var util = utility(state, plyr, null);
+	//console.log('minV p: ' + plyr + ' ste ' + state + ' util ' + util);
+	if ( terminalTest(state) || util != 0 ) return util;
 	var v = +INF;
 	var retSucc = successors(state, plyr);
 	//console.log('minVal ret: ' + retSucc.toString());
 	var arrayLength = retSucc.length;
 	for ( var i = 0; i < arrayLength; i++ ) {
-		//console.log('minVal for: ' + retSucc[i]);
-		v = Math.min(v, maxVal(retSucc[i], plyr));
+		v = Math.min(v, maxVal(retSucc[i], oPlayer(plyr)));
 	}
 	return v;
 }
