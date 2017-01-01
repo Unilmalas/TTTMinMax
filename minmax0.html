@@ -40,9 +40,10 @@ var pfield = [	[0, 0, 0],
 				
 var INF = Number.MAX_VALUE;
 
-//successors('010020000', '1'); // players are 1 and 2, 0 is empty
-//console.log(utility('201111200', '2', null));
-console.log(minimaxDecision('201110200', '2'));
+//console.log(minimaxDecision('201110202', '2')); // correct
+//console.log(minimaxDecision('201110220', '2')); // correct
+//console.log(minimaxDecision('211020100', '2')); // correct
+//console.log(minimaxDecision('201110200', '2')); // correct
 
 // playfield and user interaction
 
@@ -152,7 +153,7 @@ function strPfield(str) { // convert string to playfield, returns pf as array
 	var pf = [];
 	for (var i=0; i<fieldsize; i++ ) {
 		pf[i] = parseInt(str.charAt(i));
-		console.log('c0 ' + (i - i % 3)/3 + ' c1 ' + (i % 3) + ' str i ' + i + ' ' + str.charAt(i));
+		//console.log('c0 ' + (i - i % 3)/3 + ' c1 ' + (i % 3) + ' str i ' + i + ' ' + str.charAt(i));
 		pfield[(i - i % 3)/3][i % 3] = parseInt(str.charAt(i));
 	}
 	return pf;
@@ -250,52 +251,60 @@ function minimaxDecision(state, plyr) { // state is the current game state, for 
 		return state; // no action to be taken (terminal)
 	}
 	var v = -INF;
-	var retSucc = successors(state, plyr);
+	var retSucc = successors(state, plyr); // player moves
 	var arrayLength = retSucc.length;
 	var chosenAction = -1;
 	for ( var i = 0; i < arrayLength; i++ ) {
-		var currMax = minVal(retSucc[i], plyr);
-		console.log('minimax dec ' + retSucc[i] + ' cMin ' + currMax);
-		if ( currMax > v ) {
+		//console.log('processing state ' + retSucc[i]);
+		var currMax = maxVal(retSucc[i], plyr, 0); // choose move which maximizes utility
+		//console.log('mimxdec ' + state + ' cMin ' + currMax);
+		if ( currMax >= v ) {
 			chosenAction = i;
 			v = currMax;
 		}
 	}
 	//return action in successors(state, plyr) with value v; todo: need a util eval for this
-	//console.log('v: ' + v + ' action chosen: ' + chosenAction + ' : ' + retSucc[chosenAction]);
+	console.log('v: ' + v + ' action chosen: ' + chosenAction + ' : ' + retSucc[chosenAction]);
 	if ( chosenAction >= 0 ) return retSucc[chosenAction];
 }
 	
-function maxVal(state, plyr) { // returns utility value
+function maxVal(state, plyr, iter) { // returns utility value
 	var util = utility(state, plyr, null);
-	//console.log('maxV p: ' + plyr + ' ste ' + state + ' util ' + util);
-	if ( terminalTest(state) || util != 0 ) return util;
+	//console.log('maxV ' + iter + ' p: ' + plyr + ' ste ' + state + ' util ' + util);
+	if ( terminalTest(state) || util != 0 ) {
+		iter--;
+		//console.log('max back');
+		return util;
+	}
 	var v = -INF;
 	var retSucc = successors(state, plyr);
-	//console.log('maxVal ret: ' + retSucc.toString());
 	var arrayLength = retSucc.length;
 	for ( var i = 0; i < arrayLength; i++ ) {
-		//console.log('maxVal for: ' + retSucc[i]);
-		v = Math.max(v, minVal(retSucc[i], oPlayer(plyr)));
+		v = Math.max(v, minVal(retSucc[i], oPlayer(plyr), iter++));
 	}
 	return v;
 }
 
-function minVal(state, plyr) { // returns utility value
+function minVal(state, plyr, iter) { // returns utility value
 	var util = utility(state, plyr, null);
-	//console.log('minV p: ' + plyr + ' ste ' + state + ' util ' + util);
-	if ( terminalTest(state) || util != 0 ) return util;
+	//console.log('minV ' + iter + ' p: ' + plyr + ' ste ' + state + ' util ' + util);
+	if ( terminalTest(state) || util != 0 ) {
+		iter--;
+		//console.log('min back');
+		return util;
+	}
 	var v = +INF;
 	var retSucc = successors(state, plyr);
-	//console.log('minVal ret: ' + retSucc.toString());
 	var arrayLength = retSucc.length;
 	for ( var i = 0; i < arrayLength; i++ ) {
-		v = Math.min(v, maxVal(retSucc[i], oPlayer(plyr)));
+		//console.log(' minv pre ' + v);
+		v = Math.min(v, maxVal(retSucc[i], oPlayer(plyr), iter++));
+		//console.log(' minv post ' + v);
 	}
 	return v;
 }
 
 </script>
-<p><strong>Note:</strong> MinMax </p>
+<p><strong>Note:</strong> MiniMax </p>
 </body>
 </html>
