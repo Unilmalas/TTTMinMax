@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+</head>
+<body>
+
+MiniMax Test
+
+<script>
+"use strict";
+
+// MinMax test (see Russel/Norvig)
+
+var INF = Number.MAX_VALUE;
+
+console.log(minimaxDecision(-4, 1));
+
+// game logic
+
+function oPlayer(plyr) { // invert player
+	if (plyr == '1') return '2';
+	else return '1';
+}
+
+function successors(state) { // returns all possible successors from current state for plyr in array retSucc
+	switch ( state ) {
+		case -1:
+			return [0, 1, 2];
+		case -2:
+			return [3, 4, 5];
+		case -3:
+			return [6, 7, 8];
+		case -4:
+			return [-1, -2, -3];
+		default:
+			return [state];
+	}
+}
+
+function utility(state) { // returns utility for current state (+1: win, -1: loss, 0: draw), assumes state not terminal
+	// detect win-patterns, first for plyr, then for other player (!plyr)
+	switch ( state ) {
+		case 0:
+			return 3;
+		case 1:
+			return 12;
+		case 2:
+			return 8;
+		case 3:
+			return 2;
+		case 4:
+			return 4;
+		case 5:
+			return 6;
+		case 6:
+			return 14;
+		case 7:
+			return 5;
+		case 8:
+			return 2;
+	}
+	return 0; // default (non-terminal case)
+}
+
+function terminalTest(state) { // checks for further moves, returns true if end reached
+	if ( state >= 0 ) return true;
+	return false;
+}
+
+function minimaxDecision(state, plyr) { // state is the current game state, for player plyr
+	var util = utility(state);
+	if ( terminalTest(state) || util != 0 ) {
+		return state; // no action to be taken (terminal)
+	}
+	var v = -INF;
+	var retSucc = successors(state); // player moves
+	var arrayLength = retSucc.length;
+	var chosenAction = -1;
+	console.log('dec: ' + retSucc);
+	for ( var i = 0; i < arrayLength; i++ ) {
+		var currMax = minVal(retSucc[i], plyr); // choose move which maximizes utility (need to choose action here)
+		if ( currMax >= v ) {
+			chosenAction = i;
+			v = currMax;
+		}
+	}
+	//return action in successors(state, plyr) with value v; todo: need a util eval for this
+	console.log('v: ' + v + ' action chosen: ' + chosenAction + ' : ' + retSucc[chosenAction]);
+	if ( chosenAction >= 0 ) return retSucc[chosenAction];
+	else return state; // no action
+}
+	
+function maxVal(state, plyr) { // returns utility value
+	var util = utility(state);
+	if ( terminalTest(state) || util != 0 ) {
+		console.log('max ret util: ' + util);
+		return util;
+	}
+	var v = -INF;
+	var retSucc = successors(state);
+	var arrayLength = retSucc.length;
+	console.log('max: ' + retSucc + ' util ' + util);
+	for ( var i = 0; i < arrayLength; i++ ) {
+		v = Math.max(v, minVal(retSucc[i], oPlayer(plyr)));
+		//console.log('max v: ' + v);
+	}
+	return v;
+}
+
+function minVal(state, plyr) { // returns utility value
+	var util = utility(state);
+	if ( terminalTest(state) || util != 0 ) {
+		console.log('min ret util: ' + util);
+		return util;
+	}
+	var v = +INF;
+	var retSucc = successors(state);
+	var arrayLength = retSucc.length;
+	console.log('min: ' + retSucc + ' util ' + util);
+	for ( var i = 0; i < arrayLength; i++ ) {
+		v = Math.min(v, maxVal(retSucc[i], oPlayer(plyr)));
+		//console.log('min v: ' + v);
+	}
+	return v;
+}
+
+</script>
+<p><strong>Note:</strong> MiniMax example from pg. 164 of Russel/Norvig to illustrate logic </p>
+</body>
+</html>
